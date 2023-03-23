@@ -1,0 +1,9 @@
+[versions]
+kotlinx-coroutine-test = "1.6.4"
+kotlinx-datetime = "0.4.0"
+okio = "3.3.0"
+
+[libraries]
+kotlinx-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutine-test" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime"}
+okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
