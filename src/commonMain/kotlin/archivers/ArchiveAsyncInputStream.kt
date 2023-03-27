@@ -1,0 +1,4 @@
+package archivers
+
+class ArchiveAsyncInputStream {
+}
