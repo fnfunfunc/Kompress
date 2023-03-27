@@ -1,4 +1,8 @@
 package compress.methods
 
-class CompressMethod {
+import okio.BufferedSink
+import okio.BufferedSource
+
+interface CompressMethod {
+    suspend fun compress(inputSource: BufferedSource, outputSink: BufferedSink, fileSize: Long)
 }

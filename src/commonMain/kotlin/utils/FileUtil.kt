@@ -2,6 +2,7 @@ package utils
 
 import okio.FileSystem
 import okio.Path
+import okio.Path.Companion.toPath
 
 expect object FileUtil {
     val fileSystem: FileSystem
@@ -9,5 +10,5 @@ expect object FileUtil {
     val tempDirectoryPath: Path
 }
 
-
-expect fun String.commonToPath(normalize: Boolean): Path
+fun FileUtil.getFileSizeByPath(path: Path): Long =
+    fileSystem.metadata(path).size ?: 0

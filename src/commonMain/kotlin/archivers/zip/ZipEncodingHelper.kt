@@ -1,4 +1,5 @@
 package archivers.zip
 
-class ZipEncodingHelper {
+object ZipEncodingHelper {
+
 }

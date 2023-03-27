@@ -8,27 +8,28 @@ import utils.checksum
 
 object ZipBuilder {
 
-    suspend fun createZipFromTree(file: Path, outputPath: Path){
+    fun createZipFromTree(inputPath: Path, outputPath: Path){
         val outputFile = FileUtil.fileSystem.openReadWrite(outputPath, mustExist = false)
+        val sink = outputFile.sink()
         val buffer = Buffer()
-        createZipFromTreeTo(file, outputFile, buffer)
-        outputFile.write(fileOffset = 0, source = buffer, buffer.size)
+        createZipFromTreeTo(inputPath, buffer)
+        sink.write(buffer, buffer.size)
         buffer.close()
         outputFile.close()
     }
 
-    suspend fun createZipFromTreeTo(file: Path, outputFile: FileHandle, buffer: Buffer) {
-        val entries = arrayListOf<ZipEntry>()
-        addZipFileEntryTree(file, entries, buffer)
+    private fun createZipFromTreeTo(inputPath: Path, buffer: Buffer) {
+        val entries = mutableListOf<ZipEntry>()
+        addZipFileEntryTree(inputPath, entries, buffer)
+
         val directoryStart = buffer.size
         for (entry in entries) {
             addDirEntry(entry, buffer)
         }
         val directoryEnd = buffer.size
-
         val comment = byteArrayOf()
 
-        (buffer as BufferedSink).apply {
+        buffer.apply {
             write(byteString = "PK\u0005\u0006".encodeUtf8())
             writeShortLe(0)
             writeShortLe(0)
@@ -41,9 +42,8 @@ object ZipBuilder {
         }
     }
 
-    suspend fun addZipFileEntry(entry: Path, buffer: Buffer): ZipEntry {
-        val fileHandle = FileUtil.fileSystem.openReadWrite(file = entry)
-        val fileMetadata = FileUtil.fileSystem.metadata(entry)
+    private fun addZipFileEntry(entry: Path, buffer: Buffer): ZipEntry {
+        val fileHandle = FileUtil.fileSystem.openReadOnly(file = entry)
         val size = fileHandle.size().toInt()
         val versionMadeBy = 0x314
         val extractVersion = 10
@@ -56,13 +56,11 @@ object ZipBuilder {
         val name = entry.name.trim('/')//entry.segments.last()
         val nameBytes = name.encodeUtf8().toByteArray()
         val extraBytes = byteArrayOf()
-        val compressedSize = size
-        val uncompressedSize = size
 
 
         val headerOffset = buffer.size
 
-        (buffer as BufferedSink).apply {
+        buffer.apply {
             write(byteString = "PK\u0003\u0004".encodeUtf8())
             writeShortLe(extractVersion)
             writeShortLe(flags)
@@ -70,8 +68,8 @@ object ZipBuilder {
             writeShortLe(date)
             writeShortLe(time)
             writeIntLe(crc32)
-            writeIntLe(compressedSize)
-            writeIntLe(uncompressedSize)
+            writeIntLe(size)
+            writeIntLe(size)
             writeShortLe(nameBytes.size)
             writeShortLe(extraBytes.size)
             write(nameBytes)
@@ -90,8 +88,8 @@ object ZipBuilder {
             date = date,
             time = time,
             crc32 = crc32,
-            compressedSize = compressedSize,
-            uncompressedSize = uncompressedSize,
+            compressedSize = size,
+            uncompressedSize = size,
             nameBytes = nameBytes,
             extraBytes = extraBytes,
             commentBytes = byteArrayOf(),
@@ -101,16 +99,18 @@ object ZipBuilder {
         )
     }
 
-    private suspend fun addZipFileEntryTree(entry: Path, entries: MutableList<ZipEntry>, buffer: Buffer) {
+    private fun addZipFileEntryTree(entry: Path, entries: MutableList<ZipEntry>, buffer: Buffer) {
         if (FileUtil.fileSystem.metadata(entry).isDirectory) {
-            FileUtil.fileSystem.list(entry).forEach { addZipFileEntryTree( it, entries, buffer) }
+            FileUtil.fileSystem.list(entry).forEach {
+                addZipFileEntryTree(it, entries, buffer)
+            }
         } else {
-            entries += addZipFileEntry(entry, buffer)
+            entries.add(addZipFileEntry(entry, buffer))
         }
     }
 
-    private suspend fun addDirEntry(entry: ZipEntry, buffer: Buffer) {
-        (buffer as BufferedSink).apply {
+    private fun addDirEntry(entry: ZipEntry, buffer: Buffer) {
+        buffer.apply {
             write("PK\u0001\u0002".encodeUtf8())
             writeShortLe(entry.versionMadeBy)
             writeShortLe(entry.extractVersion)

@@ -1,8 +1,7 @@
-package archivers
+package archivers.utils
 
 import com.soywiz.korio.lang.IOException
 import com.soywiz.korio.stream.SyncInputStream
-import utils.Buffer
 import utils.ByteBuffer
 import kotlin.math.min
 

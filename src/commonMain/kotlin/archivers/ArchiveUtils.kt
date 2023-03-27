@@ -1,10 +1,12 @@
 package archivers
 
 import utils.CommonCharset
+import utils.decodeToString
+import utils.dropLastZero
 import utils.encodeToByteArray
 import kotlin.math.min
 
-object ArchiveUtil {
+object ArchiveUtils {
 
     private const val MAX_SANITIZED_NAME_LENGTH = 255
 
@@ -244,8 +246,21 @@ object ArchiveUtil {
      * @return the bytes, interpreted as an Ascii string
      */
     fun toAsciiString(inputBytes: ByteArray): String {
-        return inputBytes
+        return inputBytes.decodeToString(CommonCharset.US_ASCII)
     }
+
+    /**
+     * Convert an input byte array to a String using the ASCII character set.
+     *
+     * @param inputBytes input byte array
+     * @param offset offset within array
+     * @param length length of array
+     * @return the bytes, interpreted as an Ascii string
+     */
+    fun toAsciiString(inputBytes: ByteArray, offset: Int, length: Int): String {
+        return inputBytes.sliceArray(offset until (offset + length)).decodeToString(CommonCharset.US_ASCII)
+    }
+
 
 
 }

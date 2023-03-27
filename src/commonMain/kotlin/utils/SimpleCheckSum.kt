@@ -3,7 +3,7 @@ package utils
 import okio.Buffer
 import okio.Source
 
-interface SimpleChecksum {
+sealed interface SimpleChecksum {
     val initialValue: Int
     fun update(old: Int, data: ByteArray, offset: Int = 0, len: Int = data.size - offset): Int
 }
@@ -11,7 +11,7 @@ interface SimpleChecksum {
 object CRC32 : SimpleChecksum {
     override val initialValue = 0
 
-    private val TABLE = IntArray(0x100) {
+    internal val TABLE = IntArray(0x100) {
         var c = it
         for (k in 0 until 8) c = (if ((c and 1) != 0) -0x12477ce0 xor (c ushr 1) else c ushr 1)
         c
@@ -29,7 +29,7 @@ fun SimpleChecksum.compute(data: ByteArray, offset: Int = 0, len: Int = data.siz
 
 fun ByteArray.checksum(checksum: SimpleChecksum): Int = checksum.compute(this)
 
-suspend fun Source.checksum(checksum: SimpleChecksum): Int {
+fun Source.checksum(checksum: SimpleChecksum): Int {
     var value = checksum.initialValue
     val temp = Buffer()
     while (true) {

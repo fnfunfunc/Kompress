@@ -9,7 +9,7 @@ import okio.IOException
 import kotlin.math.min
 import archivers.sevenzip.rangeCoder.Encoder as RangeEncoder
 
-class Encoder {
+class LzmaEncoder {
     var _state = Base.StateInit()
     var _previousByte: Byte = 0
     var _repDistances = IntArray(Base.kNumRepDistances)
@@ -200,35 +200,37 @@ class Encoder {
         }
     }
 
-    inner class Optimal() {
-        var State = 0
-        var Prev1IsChar = false
-        var Prev2 = false
-        var PosPrev2 = 0
-        var BackPrev2 = 0
-        var Price = 0
-        var PosPrev = 0
-        var BackPrev = 0
-        var Backs0 = 0
-        var Backs1 = 0
-        var Backs2 = 0
-        var Backs3 = 0
-        fun MakeAsChar() {
-            BackPrev = -1
-            Prev1IsChar = false
+    inner class Optimal(
+        var state: Int = 0,
+        var prev1IsChar: Boolean = false,
+        var prev2: Boolean = false,
+        var posPrev2: Int = 0,
+        var backPrev2: Int = 0,
+        var price: Int = 0,
+        var posPrev: Int = 0,
+        var backPrev: Int = 0,
+        var backs0: Int = 0,
+        var backs1: Int = 0,
+        var backs2: Int = 0,
+        var backs3: Int = 0
+    ) {
+
+        fun makeAsChar() {
+            backPrev = -1
+            prev1IsChar = false
         }
 
-        fun MakeAsShortRep() {
-            BackPrev = 0
-            Prev1IsChar = false
+        fun makeAsShortRep() {
+            backPrev = 0
+            prev1IsChar = false
         }
 
-        fun IsShortRep(): Boolean {
-            return BackPrev == 0
+        fun isShortRep(): Boolean {
+            return backPrev == 0
         }
     }
 
-    var _optimum = arrayOfNulls<Optimal>(kNumOpts)
+    var _optimum = Array(kNumOpts) { Optimal() }
     var _matchFinder: BinTree? = null
     var _rangeEncoder: RangeEncoder = RangeEncoder()
     var _isMatch = ShortArray(Base.kNumStates shl Base.kNumPosStatesBitsMax)
@@ -339,7 +341,7 @@ class Encoder {
                 RangeEncoder.GetPrice0(_isRep0Long[(state shl Base.kNumPosStatesBitsMax) + posState].toInt())
     }
 
-    fun GetPureRepPrice(repIndex: Int, state: Int, posState: Int): Int {
+    fun getPureRepPrice(repIndex: Int, state: Int, posState: Int): Int {
         var price: Int
         if (repIndex == 0) {
             price = RangeEncoder.GetPrice0(_isRepG0[state].toInt())
@@ -354,9 +356,9 @@ class Encoder {
         return price
     }
 
-    fun GetRepPrice(repIndex: Int, len: Int, state: Int, posState: Int): Int {
+    fun getRepPrice(repIndex: Int, len: Int, state: Int, posState: Int): Int {
         val price = _repMatchLenEncoder.GetPrice(len - Base.kMatchMinLen, posState)
-        return price + GetPureRepPrice(repIndex, state, posState)
+        return price + getPureRepPrice(repIndex, state, posState)
     }
 
     fun GetPosLenPrice(pos: Int, len: Int, posState: Int): Int {
@@ -364,7 +366,7 @@ class Encoder {
         val lenToPosState = Base.GetLenToPosState(len)
         if (pos < Base.kNumFullDistances) price =
             _distancesPrices[(lenToPosState * Base.kNumFullDistances) + pos] else price =
-            _posSlotPrices[(lenToPosState shl Base.kNumPosSlotBits) + GetPosSlot2(pos)] +
+            _posSlotPrices[(lenToPosState shl Base.kNumPosSlotBits) + getPosSlot2(pos)] +
                     _alignPrices[pos and Base.kAlignMask]
         return price + _lenEncoder.GetPrice(len - Base.kMatchMinLen, posState)
     }
@@ -372,28 +374,28 @@ class Encoder {
     fun Backward(cur: Int): Int {
         var cur = cur
         _optimumEndIndex = cur
-        var posMem = _optimum[cur]!!.PosPrev
-        var backMem = _optimum[cur]!!.BackPrev
+        var posMem = _optimum[cur].posPrev
+        var backMem = _optimum[cur].backPrev
         do {
-            if (_optimum[cur]!!.Prev1IsChar) {
-                _optimum[posMem]!!.MakeAsChar()
-                _optimum[posMem]!!.PosPrev = posMem - 1
-                if (_optimum[cur]!!.Prev2) {
-                    _optimum[posMem - 1]!!.Prev1IsChar = false
-                    _optimum[posMem - 1]!!.PosPrev = _optimum[cur]!!.PosPrev2
-                    _optimum[posMem - 1]!!.BackPrev = _optimum[cur]!!.BackPrev2
+            if (_optimum[cur].prev1IsChar) {
+                _optimum[posMem].makeAsChar()
+                _optimum[posMem].posPrev = posMem - 1
+                if (_optimum[cur].prev2) {
+                    _optimum[posMem - 1].prev1IsChar = false
+                    _optimum[posMem - 1].posPrev = _optimum[cur].posPrev2
+                    _optimum[posMem - 1].backPrev = _optimum[cur].backPrev2
                 }
             }
             val posPrev = posMem
             val backCur = backMem
-            backMem = _optimum[posPrev]!!.BackPrev
-            posMem = _optimum[posPrev]!!.PosPrev
-            _optimum[posPrev]!!.BackPrev = backCur
-            _optimum[posPrev]!!.PosPrev = cur
+            backMem = _optimum[posPrev].backPrev
+            posMem = _optimum[posPrev].posPrev
+            _optimum[posPrev].backPrev = backCur
+            _optimum[posPrev].posPrev = cur
             cur = posPrev
         } while (cur > 0)
-        backRes = _optimum[0]!!.BackPrev
-        _optimumCurrentIndex = _optimum[0]!!.PosPrev
+        backRes = _optimum[0].backPrev
+        _optimumCurrentIndex = _optimum[0].posPrev
         return _optimumCurrentIndex
     }
 
@@ -405,9 +407,9 @@ class Encoder {
     fun GetOptimum(position: Int): Int {
         var position = position
         if (_optimumEndIndex != _optimumCurrentIndex) {
-            val lenRes = _optimum[_optimumCurrentIndex]!!.PosPrev - _optimumCurrentIndex
-            backRes = _optimum[_optimumCurrentIndex]!!.BackPrev
-            _optimumCurrentIndex = _optimum[_optimumCurrentIndex]!!.PosPrev
+            val lenRes = _optimum[_optimumCurrentIndex]!!.posPrev - _optimumCurrentIndex
+            backRes = _optimum[_optimumCurrentIndex]!!.backPrev
+            _optimumCurrentIndex = _optimum[_optimumCurrentIndex]!!.posPrev
             return lenRes
         }
         _optimumEndIndex = 0
@@ -428,8 +430,7 @@ class Encoder {
         }
         if (numAvailableBytes > Base.kMatchMaxLen) numAvailableBytes = Base.kMatchMaxLen
         var repMaxIndex = 0
-        var i: Int
-        i = 0
+        var i = 0
         while (i < Base.kNumRepDistances) {
             reps[i] = _repDistances[i]
             repLens[i] = _matchFinder!!.GetMatchLen(0 - 1, reps[i], Base.kMatchMaxLen)
@@ -453,35 +454,35 @@ class Encoder {
             backRes = -1
             return 1
         }
-        _optimum[0]!!.State = _state
+        _optimum[0].state = _state
         var posState = position and _posStateMask
-        _optimum[1]!!.Price =
+        _optimum[1].price =
             RangeEncoder.GetPrice0(_isMatch[(_state shl Base.kNumPosStatesBitsMax) + posState].toInt()) +
                     _literalEncoder.GetSubCoder(position, _previousByte)!!
                         .GetPrice(!Base.StateIsCharState(_state), matchByte, currentByte)
-        _optimum[1]!!.MakeAsChar()
+        _optimum[1].makeAsChar()
         var matchPrice: Int =
             RangeEncoder.GetPrice1(_isMatch[(_state shl Base.kNumPosStatesBitsMax) + posState].toInt())
         var repMatchPrice: Int = matchPrice + RangeEncoder.GetPrice1(_isRep[_state].toInt())
         if (matchByte == currentByte) {
             val shortRepPrice = repMatchPrice + GetRepLen1Price(_state, posState)
-            if (shortRepPrice < _optimum[1]!!.Price) {
-                _optimum[1]!!.Price = shortRepPrice
-                _optimum[1]!!.MakeAsShortRep()
+            if (shortRepPrice < _optimum[1]!!.price) {
+                _optimum[1]!!.price = shortRepPrice
+                _optimum[1]!!.makeAsShortRep()
             }
         }
         var lenEnd = if (lenMain >= repLens[repMaxIndex]) lenMain else repLens[repMaxIndex]
         if (lenEnd < 2) {
-            backRes = _optimum[1]!!.BackPrev
+            backRes = _optimum[1]!!.backPrev
             return 1
         }
-        _optimum[1]!!.PosPrev = 0
-        _optimum[0]!!.Backs0 = reps[0]
-        _optimum[0]!!.Backs1 = reps[1]
-        _optimum[0]!!.Backs2 = reps[2]
-        _optimum[0]!!.Backs3 = reps[3]
+        _optimum[1]!!.posPrev = 0
+        _optimum[0]!!.backs0 = reps[0]
+        _optimum[0]!!.backs1 = reps[1]
+        _optimum[0]!!.backs2 = reps[2]
+        _optimum[0]!!.backs3 = reps[3]
         var len = lenEnd
-        do _optimum[len--]!!.Price = kIfinityPrice while (len >= 2)
+        do _optimum[len--]!!.price = kIfinityPrice while (len >= 2)
         i = 0
         while (i < Base.kNumRepDistances) {
             var repLen = repLens[i]
@@ -489,15 +490,15 @@ class Encoder {
                 i++
                 continue
             }
-            val price = repMatchPrice + GetPureRepPrice(i, _state, posState)
+            val price = repMatchPrice + getPureRepPrice(i, _state, posState)
             do {
                 val curAndLenPrice = price + _repMatchLenEncoder.GetPrice(repLen - 2, posState)
                 val optimum = _optimum[repLen]
-                if (curAndLenPrice < optimum!!.Price) {
-                    optimum.Price = curAndLenPrice
-                    optimum.PosPrev = 0
-                    optimum.BackPrev = i
-                    optimum.Prev1IsChar = false
+                if (curAndLenPrice < optimum!!.price) {
+                    optimum.price = curAndLenPrice
+                    optimum.posPrev = 0
+                    optimum.backPrev = i
+                    optimum.prev1IsChar = false
                 }
             } while (--repLen >= 2)
             i++
@@ -511,11 +512,11 @@ class Encoder {
                 val distance = _matchDistances[offs + 1]
                 val curAndLenPrice = normalMatchPrice + GetPosLenPrice(distance, len, posState)
                 val optimum = _optimum[len]
-                if (curAndLenPrice < optimum!!.Price) {
-                    optimum.Price = curAndLenPrice
-                    optimum.PosPrev = 0
-                    optimum.BackPrev = distance + Base.kNumRepDistances
-                    optimum.Prev1IsChar = false
+                if (curAndLenPrice < optimum!!.price) {
+                    optimum.price = curAndLenPrice
+                    optimum.posPrev = 0
+                    optimum.backPrev = distance + Base.kNumRepDistances
+                    optimum.prev1IsChar = false
                 }
                 if (len == _matchDistances[offs]) {
                     offs += 2
@@ -536,67 +537,65 @@ class Encoder {
                 return Backward(cur)
             }
             position++
-            var posPrev = _optimum[cur]!!.PosPrev
+            var posPrev = _optimum[cur].posPrev
             var state: Int
-            if (_optimum[cur]!!.Prev1IsChar) {
+            if (_optimum[cur].prev1IsChar) {
                 posPrev--
-                if (_optimum[cur]!!.Prev2) {
-                    state = _optimum[_optimum[cur]!!.PosPrev2]!!.State
-                    if (_optimum[cur]!!.BackPrev2 < Base.kNumRepDistances) state =
-                        Base.StateUpdateRep(state) else state = Base.StateUpdateMatch(state)
-                } else state = _optimum[posPrev]!!.State
+                if (_optimum[cur].prev2) {
+                    state = _optimum[_optimum[cur].posPrev2].state
+                    state = if (_optimum[cur].backPrev2 < Base.kNumRepDistances) Base.StateUpdateRep(state) else Base.StateUpdateMatch(state)
+                } else state = _optimum[posPrev].state
                 state = Base.StateUpdateChar(state)
-            } else state = _optimum[posPrev]!!.State
+            } else state = _optimum[posPrev].state
             if (posPrev == cur - 1) {
-                if (_optimum[cur]!!.IsShortRep()) state = Base.StateUpdateShortRep(state) else state =
-                    Base.StateUpdateChar(state)
+                state = if (_optimum[cur].isShortRep()) Base.StateUpdateShortRep(state) else Base.StateUpdateChar(state)
             } else {
                 var pos: Int
-                if (_optimum[cur]!!.Prev1IsChar && _optimum[cur]!!.Prev2) {
-                    posPrev = _optimum[cur]!!.PosPrev2
-                    pos = _optimum[cur]!!.BackPrev2
+                if (_optimum[cur].prev1IsChar && _optimum[cur].prev2) {
+                    posPrev = _optimum[cur].posPrev2
+                    pos = _optimum[cur].backPrev2
                     state = Base.StateUpdateRep(state)
                 } else {
-                    pos = _optimum[cur]!!.BackPrev
-                    if (pos < Base.kNumRepDistances) state = Base.StateUpdateRep(state) else state =
-                        Base.StateUpdateMatch(state)
+                    pos = _optimum[cur].backPrev
+                    state =
+                        if (pos < Base.kNumRepDistances) Base.StateUpdateRep(state) else Base.StateUpdateMatch(state)
                 }
                 val opt = _optimum[posPrev]
                 if (pos < Base.kNumRepDistances) {
                     if (pos == 0) {
-                        reps[0] = opt!!.Backs0
-                        reps[1] = opt.Backs1
-                        reps[2] = opt.Backs2
-                        reps[3] = opt.Backs3
+                        reps[0] = opt.backs0
+                        reps[1] = opt.backs1
+                        reps[2] = opt.backs2
+                        reps[3] = opt.backs3
                     } else if (pos == 1) {
-                        reps[0] = opt!!.Backs1
-                        reps[1] = opt.Backs0
-                        reps[2] = opt.Backs2
-                        reps[3] = opt.Backs3
+                        reps[0] = opt.backs1
+                        reps[1] = opt.backs0
+                        reps[2] = opt.backs2
+                        reps[3] = opt.backs3
                     } else if (pos == 2) {
-                        reps[0] = opt!!.Backs2
-                        reps[1] = opt.Backs0
-                        reps[2] = opt.Backs1
-                        reps[3] = opt.Backs3
+                        reps[0] = opt.backs2
+                        reps[1] = opt.backs0
+                        reps[2] = opt.backs1
+                        reps[3] = opt.backs3
                     } else {
-                        reps[0] = opt!!.Backs3
-                        reps[1] = opt.Backs0
-                        reps[2] = opt.Backs1
-                        reps[3] = opt.Backs2
+                        reps[0] = opt.backs3
+                        reps[1] = opt.backs0
+                        reps[2] = opt.backs1
+                        reps[3] = opt.backs2
                     }
                 } else {
                     reps[0] = pos - Base.kNumRepDistances
-                    reps[1] = opt!!.Backs0
-                    reps[2] = opt.Backs1
-                    reps[3] = opt.Backs2
+                    reps[1] = opt.backs0
+                    reps[2] = opt.backs1
+                    reps[3] = opt.backs2
                 }
             }
-            _optimum[cur]!!.State = state
-            _optimum[cur]!!.Backs0 = reps[0]
-            _optimum[cur]!!.Backs1 = reps[1]
-            _optimum[cur]!!.Backs2 = reps[2]
-            _optimum[cur]!!.Backs3 = reps[3]
-            val curPrice = _optimum[cur]!!.Price
+            _optimum[cur].state = state
+            _optimum[cur].backs0 = reps[0]
+            _optimum[cur].backs1 = reps[1]
+            _optimum[cur].backs2 = reps[2]
+            _optimum[cur].backs3 = reps[3]
+            val curPrice = _optimum[cur].price
             currentByte = _matchFinder!!.GetIndexByte(0 - 1)
             matchByte = _matchFinder!!.GetIndexByte(0 - reps[0] - 1 - 1)
             posState = position and _posStateMask
@@ -606,23 +605,23 @@ class Encoder {
                         .GetPrice(!Base.StateIsCharState(state), matchByte, currentByte)
             val nextOptimum = _optimum[cur + 1]
             var nextIsChar = false
-            if (curAnd1Price < nextOptimum!!.Price) {
-                nextOptimum.Price = curAnd1Price
-                nextOptimum.PosPrev = cur
-                nextOptimum.MakeAsChar()
+            if (curAnd1Price < nextOptimum.price) {
+                nextOptimum.price = curAnd1Price
+                nextOptimum.posPrev = cur
+                nextOptimum.makeAsChar()
                 nextIsChar = true
             }
             matchPrice =
                 curPrice + RangeEncoder.GetPrice1(_isMatch[(state shl Base.kNumPosStatesBitsMax) + posState].toInt())
             repMatchPrice = matchPrice + RangeEncoder.GetPrice1(_isRep[state].toInt())
             if (matchByte == currentByte &&
-                !(nextOptimum.PosPrev < cur && nextOptimum.BackPrev == 0)
+                !(nextOptimum.posPrev < cur && nextOptimum.backPrev == 0)
             ) {
                 val shortRepPrice = repMatchPrice + GetRepLen1Price(state, posState)
-                if (shortRepPrice <= nextOptimum.Price) {
-                    nextOptimum.Price = shortRepPrice
-                    nextOptimum.PosPrev = cur
-                    nextOptimum.MakeAsShortRep()
+                if (shortRepPrice <= nextOptimum.price) {
+                    nextOptimum.price = shortRepPrice
+                    nextOptimum.posPrev = cur
+                    nextOptimum.makeAsShortRep()
                     nextIsChar = true
                 }
             }
@@ -643,17 +642,17 @@ class Encoder {
                             RangeEncoder.GetPrice1(_isRep[state2].toInt())
                     run {
                         val offset: Int = cur + 1 + lenTest2
-                        while (lenEnd < offset) _optimum.get(++lenEnd)!!.Price = kIfinityPrice
-                        val curAndLenPrice: Int = nextRepMatchPrice + GetRepPrice(
+                        while (lenEnd < offset) _optimum.get(++lenEnd)!!.price = kIfinityPrice
+                        val curAndLenPrice: Int = nextRepMatchPrice + getRepPrice(
                             0, lenTest2, state2, posStateNext
                         )
-                        val optimum: Optimal? = _optimum.get(offset)
-                        if (curAndLenPrice < optimum!!.Price) {
-                            optimum.Price = curAndLenPrice
-                            optimum.PosPrev = cur + 1
-                            optimum.BackPrev = 0
-                            optimum.Prev1IsChar = true
-                            optimum.Prev2 = false
+                        val optimum: Optimal = _optimum[offset]
+                        if (curAndLenPrice < optimum.price) {
+                            optimum.price = curAndLenPrice
+                            optimum.posPrev = cur + 1
+                            optimum.backPrev = 0
+                            optimum.prev1IsChar = true
+                            optimum.prev2 = false
                         }
                     }
                 }
@@ -664,14 +663,14 @@ class Encoder {
                 if (lenTest < 2) continue
                 val lenTestTemp = lenTest
                 do {
-                    while (lenEnd < cur + lenTest) _optimum[++lenEnd]!!.Price = kIfinityPrice
-                    val curAndLenPrice = repMatchPrice + GetRepPrice(repIndex, lenTest, state, posState)
+                    while (lenEnd < cur + lenTest) _optimum[++lenEnd].price = kIfinityPrice
+                    val curAndLenPrice = repMatchPrice + getRepPrice(repIndex, lenTest, state, posState)
                     val optimum = _optimum[cur + lenTest]
-                    if (curAndLenPrice < optimum!!.Price) {
-                        optimum.Price = curAndLenPrice
-                        optimum.PosPrev = cur
-                        optimum.BackPrev = repIndex
-                        optimum.Prev1IsChar = false
+                    if (curAndLenPrice < optimum.price) {
+                        optimum.price = curAndLenPrice
+                        optimum.posPrev = cur
+                        optimum.backPrev = repIndex
+                        optimum.prev1IsChar = false
                     }
                 } while (--lenTest >= 2)
                 lenTest = lenTestTemp
@@ -685,7 +684,7 @@ class Encoder {
                         var state2 = Base.StateUpdateRep(state)
                         var posStateNext = position + lenTest and _posStateMask
                         val curAndLenCharPrice: Int =
-                            repMatchPrice + GetRepPrice(repIndex, lenTest, state, posState) +
+                            repMatchPrice + getRepPrice(repIndex, lenTest, state, posState) +
                                     RangeEncoder.GetPrice0(_isMatch[(state2 shl Base.kNumPosStatesBitsMax) + posStateNext].toInt()) +
                                     _literalEncoder.GetSubCoder(
                                         position + lenTest,
@@ -708,19 +707,19 @@ class Encoder {
                         // for(; lenTest2 >= 2; lenTest2--)
                         run {
                             val offset: Int = lenTest + 1 + lenTest2
-                            while (lenEnd < cur + offset) _optimum.get(++lenEnd)!!.Price =
+                            while (lenEnd < cur + offset) _optimum[++lenEnd].price =
                                 kIfinityPrice
                             val curAndLenPrice: Int =
-                                nextRepMatchPrice + GetRepPrice(0, lenTest2, state2, posStateNext)
-                            val optimum: Optimal? = _optimum.get(cur + offset)
-                            if (curAndLenPrice < optimum!!.Price) {
-                                optimum.Price = curAndLenPrice
-                                optimum.PosPrev = cur + lenTest + 1
-                                optimum.BackPrev = 0
-                                optimum.Prev1IsChar = true
-                                optimum.Prev2 = true
-                                optimum.PosPrev2 = cur
-                                optimum.BackPrev2 = repIndex
+                                nextRepMatchPrice + getRepPrice(0, lenTest2, state2, posStateNext)
+                            val optimum: Optimal = _optimum[cur + offset]
+                            if (curAndLenPrice < optimum.price) {
+                                optimum.price = curAndLenPrice
+                                optimum.posPrev = cur + lenTest + 1
+                                optimum.backPrev = 0
+                                optimum.prev1IsChar = true
+                                optimum.prev2 = true
+                                optimum.posPrev2 = cur
+                                optimum.backPrev2 = repIndex
                             }
                         }
                     }
@@ -737,7 +736,7 @@ class Encoder {
             }
             if (newLen >= startLen) {
                 normalMatchPrice = matchPrice + RangeEncoder.GetPrice0(_isRep[state].toInt())
-                while (lenEnd < cur + newLen) _optimum[++lenEnd]!!.Price = kIfinityPrice
+                while (lenEnd < cur + newLen) _optimum[++lenEnd].price = kIfinityPrice
                 var offs = 0
                 while (startLen > _matchDistances[offs]) offs += 2
                 var lenTest = startLen
@@ -745,11 +744,11 @@ class Encoder {
                     val curBack = _matchDistances[offs + 1]
                     var curAndLenPrice = normalMatchPrice + GetPosLenPrice(curBack, lenTest, posState)
                     var optimum = _optimum[cur + lenTest]
-                    if (curAndLenPrice < optimum!!.Price) {
-                        optimum.Price = curAndLenPrice
-                        optimum.PosPrev = cur
-                        optimum.BackPrev = curBack + Base.kNumRepDistances
-                        optimum.Prev1IsChar = false
+                    if (curAndLenPrice < optimum.price) {
+                        optimum.price = curAndLenPrice
+                        optimum.posPrev = cur
+                        optimum.backPrev = curBack + Base.kNumRepDistances
+                        optimum.prev1IsChar = false
                     }
                     if (lenTest == _matchDistances[offs]) {
                         if (lenTest < numAvailableBytesFull) {
@@ -779,17 +778,17 @@ class Encoder {
                                         _isRep[state2].toInt()
                                     )
                                 val offset = lenTest + 1 + lenTest2
-                                while (lenEnd < cur + offset) _optimum[++lenEnd]!!.Price = kIfinityPrice
-                                curAndLenPrice = nextRepMatchPrice + GetRepPrice(0, lenTest2, state2, posStateNext)
+                                while (lenEnd < cur + offset) _optimum[++lenEnd].price = kIfinityPrice
+                                curAndLenPrice = nextRepMatchPrice + getRepPrice(0, lenTest2, state2, posStateNext)
                                 optimum = _optimum[cur + offset]
-                                if (curAndLenPrice < optimum!!.Price) {
-                                    optimum.Price = curAndLenPrice
-                                    optimum.PosPrev = cur + lenTest + 1
-                                    optimum.BackPrev = 0
-                                    optimum.Prev1IsChar = true
-                                    optimum.Prev2 = true
-                                    optimum.PosPrev2 = cur
-                                    optimum.BackPrev2 = curBack + Base.kNumRepDistances
+                                if (curAndLenPrice < optimum.price) {
+                                    optimum.price = curAndLenPrice
+                                    optimum.posPrev = cur + lenTest + 1
+                                    optimum.backPrev = 0
+                                    optimum.prev1IsChar = true
+                                    optimum.prev2 = true
+                                    optimum.posPrev2 = cur
+                                    optimum.backPrev2 = curBack + Base.kNumRepDistances
                                 }
                             }
                         }
@@ -912,7 +911,7 @@ class Encoder {
                     _state = Base.StateUpdateMatch(_state)
                     _lenEncoder.Encode(_rangeEncoder, len - Base.kMatchMinLen, posState)
                     pos -= Base.kNumRepDistances
-                    val posSlot = GetPosSlot(pos)
+                    val posSlot = getPosSlot(pos)
                     val lenToPosState = Base.GetLenToPosState(len)
                     _posSlotEncoder[lenToPosState]!!.Encode(_rangeEncoder, posSlot)
                     if (posSlot >= Base.kStartPosModelIndex) {
@@ -1006,7 +1005,7 @@ class Encoder {
     var finished = BooleanArray(1)
 
     @Throws(IOException::class)
-    fun Code(
+    fun code(
         inStream: BufferedSource?, outStream: BufferedSink?,
         inSize: Long, outSize: Long, progress: ICodeProgress?
     ) {
@@ -1017,7 +1016,7 @@ class Encoder {
                 CodeOneBlock(processedInSize, processedOutSize, finished)
                 if (finished[0]) return
                 if (progress != null) {
-                    progress.SetProgress(processedInSize[0], processedOutSize[0])
+                    progress.setProgress(processedInSize[0], processedOutSize[0])
                 }
             }
         } finally {
@@ -1044,7 +1043,7 @@ class Encoder {
 
     fun FillDistancesPrices() {
         for (i in Base.kStartPosModelIndex until Base.kNumFullDistances) {
-            val posSlot = GetPosSlot(i)
+            val posSlot = getPosSlot(i)
             val footerBits = ((posSlot shr 1) - 1)
             val baseVal = ((2 or (posSlot and 1)) shl footerBits)
             tempPrices[i] = BitTreeEncoder.ReverseGetPrice(
@@ -1074,7 +1073,7 @@ class Encoder {
                 i++
             }
             while (i < Base.kNumFullDistances) {
-                _distancesPrices[st2 + i] = _posSlotPrices[st + GetPosSlot(i)] + tempPrices[i]
+                _distancesPrices[st2 + i] = _posSlotPrices[st + getPosSlot(i)] + tempPrices[i]
                 i++
             }
         }
@@ -1094,7 +1093,7 @@ class Encoder {
         return true
     }
 
-    fun SetDictionarySize(dictionarySize: Int): Boolean {
+    fun setDictionarySize(dictionarySize: Int): Boolean {
         val kDicLogSizeMaxCompress = 29
         if (dictionarySize < (1 shl Base.kDicLogSizeMin) || (dictionarySize > (1 shl kDicLogSizeMaxCompress))) return false
         _dictionarySize = dictionarySize
@@ -1106,13 +1105,13 @@ class Encoder {
         return true
     }
 
-    fun SetNumFastBytes(numFastBytes: Int): Boolean {
+    fun setNumFastBytes(numFastBytes: Int): Boolean {
         if (numFastBytes < 5 || numFastBytes > Base.kMatchMaxLen) return false
         _numFastBytes = numFastBytes
         return true
     }
 
-    fun SetMatchFinder(matchFinderIndex: Int): Boolean {
+    fun setMatchFinder(matchFinderIndex: Int): Boolean {
         if (matchFinderIndex < 0 || matchFinderIndex > 2) return false
         val matchFinderIndexPrev = _matchFinderType
         _matchFinderType = matchFinderIndex
@@ -1123,7 +1122,7 @@ class Encoder {
         return true
     }
 
-    fun SetLcLpPb(lc: Int, lp: Int, pb: Int): Boolean {
+    fun setLcLpPb(lc: Int, lp: Int, pb: Int): Boolean {
         if ((lp < 0) || (lp > Base.kNumLitPosStatesBitsEncodingMax) || (
                     lc < 0) || (lc > Base.kNumLitContextBitsMax) || (
                     pb < 0) || (pb > Base.kNumPosStatesBitsEncodingMax)
@@ -1135,7 +1134,7 @@ class Encoder {
         return true
     }
 
-    fun SetEndMarkerMode(endMarkerMode: Boolean) {
+    fun setEndMarkerMode(endMarkerMode: Boolean) {
         _writeEndMark = endMarkerMode
     }
 
@@ -1143,7 +1142,7 @@ class Encoder {
         val EMatchFinderTypeBT2 = 0
         val EMatchFinderTypeBT4 = 1
         val kIfinityPrice = 0xFFFFFFF
-        var g_FastPos = ByteArray(1 shl 11)
+        val g_FastPos = ByteArray(1 shl 11)
 
         init {
             val kFastSlots = 22
@@ -1161,14 +1160,14 @@ class Encoder {
             }
         }
 
-        fun GetPosSlot(pos: Int): Int {
+        fun getPosSlot(pos: Int): Int {
             if (pos < (1 shl 11)) return g_FastPos[pos].toInt()
-            return if (pos < (1 shl 21)) (g_FastPos.get(pos shr 10) + 20) else (g_FastPos.get(pos shr 20) + 40)
+            return if (pos < (1 shl 21)) (g_FastPos[pos shr 10] + 20) else (g_FastPos[pos shr 20] + 40)
         }
 
-        fun GetPosSlot2(pos: Int): Int {
+        fun getPosSlot2(pos: Int): Int {
             if (pos < (1 shl 17)) return (g_FastPos[pos shr 6] + 12)
-            return if (pos < (1 shl 27)) (g_FastPos.get(pos shr 16) + 32) else (g_FastPos.get(pos shr 26) + 52)
+            return if (pos < (1 shl 27)) (g_FastPos[pos shr 16] + 32) else (g_FastPos[pos shr 26] + 52)
         }
 
         val kDefaultDictionaryLogSize = 22

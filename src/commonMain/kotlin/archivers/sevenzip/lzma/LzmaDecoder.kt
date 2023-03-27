@@ -8,14 +8,14 @@ import okio.IOException
 import kotlin.math.max
 import archivers.sevenzip.rangeCoder.Decoder as RangeDecoder
 
-class Decoder {
+class LzmaDecoder {
     inner class LenDecoder {
         var m_Choice = ShortArray(2)
         var m_LowCoder: Array<BitTreeDecoder?> = arrayOfNulls<BitTreeDecoder>(Base.kNumPosStatesMax)
         var m_MidCoder: Array<BitTreeDecoder?> = arrayOfNulls<BitTreeDecoder>(Base.kNumPosStatesMax)
         var m_HighCoder: BitTreeDecoder = BitTreeDecoder(Base.kNumHighLenBits)
         var m_NumPosStates = 0
-        fun Create(numPosStates: Int) {
+        fun create(numPosStates: Int) {
             while (m_NumPosStates < numPosStates) {
                 m_LowCoder[m_NumPosStates] = BitTreeDecoder(Base.kNumLowLenBits)
                 m_MidCoder[m_NumPosStates] = BitTreeDecoder(Base.kNumMidLenBits)
@@ -33,14 +33,11 @@ class Decoder {
         }
 
         @Throws(IOException::class)
-        fun Decode(rangeDecoder: RangeDecoder, posState: Int): Int {
+        fun decode(rangeDecoder: RangeDecoder, posState: Int): Int {
             if (rangeDecoder.DecodeBit(m_Choice, 0) == 0) return m_LowCoder[posState]!!.Decode(rangeDecoder)
             var symbol = Base.kNumLowLenSymbols
-            if (rangeDecoder.DecodeBit(
-                    m_Choice,
-                    1
-                ) == 0
-            ) symbol += m_MidCoder[posState]!!.Decode(rangeDecoder) else symbol += Base.kNumMidLenSymbols + m_HighCoder.Decode(
+            symbol += if (rangeDecoder.DecodeBit(m_Choice, 1) == 0)
+                m_MidCoder[posState]!!.Decode(rangeDecoder) else Base.kNumMidLenSymbols + m_HighCoder.Decode(
                 rangeDecoder
             )
             return symbol
@@ -50,19 +47,19 @@ class Decoder {
     inner class LiteralDecoder {
         inner class Decoder2 {
             var m_Decoders = ShortArray(0x300)
-            fun Init() {
+            fun init() {
                 RangeDecoder.InitBitModels(m_Decoders)
             }
 
             @Throws(IOException::class)
-            fun DecodeNormal(rangeDecoder: RangeDecoder): Byte {
+            fun decodeNormal(rangeDecoder: RangeDecoder): Byte {
                 var symbol = 1
                 do symbol = symbol shl 1 or rangeDecoder.DecodeBit(m_Decoders, symbol) while (symbol < 0x100)
                 return symbol.toByte()
             }
 
             @Throws(IOException::class)
-            fun DecodeWithMatchByte(rangeDecoder: RangeDecoder, matchByte: Byte): Byte {
+            fun decodeWithMatchByte(rangeDecoder: RangeDecoder, matchByte: Byte): Byte {
                 var matchByte = matchByte
                 var symbol = 1
                 do {
@@ -93,9 +90,9 @@ class Decoder {
             for (i in 0 until numStates) m_Coders!![i] = Decoder2()
         }
 
-        fun Init() {
+        fun init() {
             val numStates = 1 shl m_NumPrevBits + m_NumPosBits
-            for (i in 0 until numStates) m_Coders!![i]!!.Init()
+            for (i in 0 until numStates) m_Coders!![i]!!.init()
         }
 
         fun GetDecoder(pos: Int, prevByte: Byte): Decoder2? {
@@ -125,7 +122,7 @@ class Decoder {
         for (i in 0 until Base.kNumLenToPosStates) m_PosSlotDecoder[i] = BitTreeDecoder(Base.kNumPosSlotBits)
     }
 
-    fun SetDictionarySize(dictionarySize: Int): Boolean {
+    fun setDictionarySize(dictionarySize: Int): Boolean {
         if (dictionarySize < 0) return false
         if (m_DictionarySize != dictionarySize) {
             m_DictionarySize = dictionarySize
@@ -135,18 +132,18 @@ class Decoder {
         return true
     }
 
-    fun SetLcLpPb(lc: Int, lp: Int, pb: Int): Boolean {
+    fun setLcLpPb(lc: Int, lp: Int, pb: Int): Boolean {
         if (lc > Base.kNumLitContextBitsMax || lp > 4 || pb > Base.kNumPosStatesBitsMax) return false
         m_LiteralDecoder.Create(lp, lc)
         val numPosStates = 1 shl pb
-        m_LenDecoder.Create(numPosStates)
-        m_RepLenDecoder.Create(numPosStates)
+        m_LenDecoder.create(numPosStates)
+        m_RepLenDecoder.create(numPosStates)
         m_PosStateMask = numPosStates - 1
         return true
     }
 
     @Throws(IOException::class)
-    fun Init() {
+    fun init() {
         m_OutWindow.Init(false)
         archivers.sevenzip.rangeCoder.Decoder.InitBitModels(m_IsMatchDecoders)
         archivers.sevenzip.rangeCoder.Decoder.InitBitModels(m_IsRep0LongDecoders)
@@ -155,9 +152,8 @@ class Decoder {
         archivers.sevenzip.rangeCoder.Decoder.InitBitModels(m_IsRepG1Decoders)
         archivers.sevenzip.rangeCoder.Decoder.InitBitModels(m_IsRepG2Decoders)
         archivers.sevenzip.rangeCoder.Decoder.InitBitModels(m_PosDecoders)
-        m_LiteralDecoder.Init()
-        var i: Int
-        i = 0
+        m_LiteralDecoder.init()
+        var i: Int = 0
         while (i < Base.kNumLenToPosStates) {
             m_PosSlotDecoder[i]!!.Init()
             i++
@@ -169,13 +165,13 @@ class Decoder {
     }
 
     @Throws(IOException::class)
-    fun Code(
+    fun code(
         inStream: BufferedSource, outStream: BufferedSink,
         outSize: Long
     ): Boolean {
         m_RangeDecoder.SetStream(inStream)
         m_OutWindow.SetStream(outStream)
-        Init()
+        init()
         var state = Base.StateInit()
         var rep0 = 0
         var rep1 = 0
@@ -188,10 +184,10 @@ class Decoder {
             if (m_RangeDecoder.DecodeBit(m_IsMatchDecoders, (state shl Base.kNumPosStatesBitsMax) + posState) == 0) {
                 val decoder2: LiteralDecoder.Decoder2? = m_LiteralDecoder.GetDecoder(nowPos64.toInt(), prevByte)
                 prevByte =
-                    if (!Base.StateIsCharState(state)) decoder2!!.DecodeWithMatchByte(
+                    if (!Base.StateIsCharState(state)) decoder2!!.decodeWithMatchByte(
                         m_RangeDecoder,
                         m_OutWindow.GetByte(rep0)
-                    ) else decoder2!!.DecodeNormal(m_RangeDecoder)
+                    ) else decoder2!!.decodeNormal(m_RangeDecoder)
                 m_OutWindow.PutByte(prevByte)
                 state = Base.StateUpdateChar(state)
                 nowPos64++
@@ -221,14 +217,14 @@ class Decoder {
                         rep0 = distance
                     }
                     if (len == 0) {
-                        len = m_RepLenDecoder.Decode(m_RangeDecoder, posState) + Base.kMatchMinLen
+                        len = m_RepLenDecoder.decode(m_RangeDecoder, posState) + Base.kMatchMinLen
                         state = Base.StateUpdateRep(state)
                     }
                 } else {
                     rep3 = rep2
                     rep2 = rep1
                     rep1 = rep0
-                    len = Base.kMatchMinLen + m_LenDecoder.Decode(m_RangeDecoder, posState)
+                    len = Base.kMatchMinLen + m_LenDecoder.decode(m_RangeDecoder, posState)
                     state = Base.StateUpdateMatch(state)
                     val posSlot: Int = m_PosSlotDecoder[Base.GetLenToPosState(len)]!!.Decode(m_RangeDecoder)
                     if (posSlot >= Base.kStartPosModelIndex) {
@@ -264,7 +260,7 @@ class Decoder {
         return true
     }
 
-    fun SetDecoderProperties(properties: ByteArray): Boolean {
+    fun setDecoderProperties(properties: ByteArray): Boolean {
         if (properties.size < 5) return false
         val `val` = properties[0].toInt() and 0xFF
         val lc = `val` % 9
@@ -273,7 +269,7 @@ class Decoder {
         val pb = remainder / 5
         var dictionarySize = 0
         for (i in 0..3) dictionarySize += properties[1 + i].toInt() and 0xFF shl i * 8
-        return if (!SetLcLpPb(lc, lp, pb)) false else SetDictionarySize(dictionarySize)
+        return if (!setLcLpPb(lc, lp, pb)) false else setDictionarySize(dictionarySize)
     }
 }
 

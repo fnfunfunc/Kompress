@@ -230,3 +230,7 @@ public val Int.prevPowerOfTwo: Int get() = if (isPowerOfTwo) this else (nextPowe
 
 /** Checks if [this] value is power of two */
 public val Int.isPowerOfTwo: Boolean get() = this.nextPowerOfTwo == this
+
+infix fun Byte.and(mask: Int): Int = this.toInt() and mask
+infix fun Byte.shl(that: Int): Int = this.toInt() shl that
+infix fun Byte.shr(that: Int): Int = this.toInt() shr that
