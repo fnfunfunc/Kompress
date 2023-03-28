@@ -17,6 +17,9 @@ fun CommonCharset.toNSStringEncoding(): NSStringEncoding = when (this) {
     CommonCharset.ISO_8859_1 -> NSISOLatin1StringEncoding
 }
 
+actual fun CommonCharset.canEncode(string: String): Boolean = (string as NSString).canBeConvertedToEncoding(toNSStringEncoding())
+
+
 actual fun String.encode(commonCharset: CommonCharset): String {
     val stringEncoding = commonCharset.toNSStringEncoding()
     val data =
@@ -36,13 +39,10 @@ actual fun String.encodeToByteArray(commonCharset: CommonCharset): ByteArray {
     return bytesPointer.readBytes(count = bytesLength)
 }
 
-fun characterSetTest() {
-    NSCharacterSet.controlCharacterSet
-}
-
 actual fun ByteArray.decodeToString(commonCharset: CommonCharset): String {
     val stringEncoding = commonCharset.toNSStringEncoding()
     val data = toKString().toNSString().dataUsingEncoding(stringEncoding, allowLossyConversion = true)
         ?: throw Exception("Unsupported character encoding, or the string cannot use the character encoding")
     return NSString.create(data, stringEncoding)?.string() ?: throw Exception("TODO")
 }
+

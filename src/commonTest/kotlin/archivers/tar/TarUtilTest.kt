@@ -2,7 +2,7 @@ package archivers.tar
 
 import com.soywiz.kmem.arraycopy
 import com.soywiz.korio.async.suspendTest
-import com.soywiz.korio.stream.openAsync
+import com.soywiz.korio.stream.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFails
@@ -82,5 +82,16 @@ class TarUtilTest {
             )
         assertEquals(1, headers.size)
         assertEquals(ae, headers["path"])
+    }
+
+    @Test
+    fun streamTest() = suspendTest {
+        val stream = "123".openAsync()
+        stream.write(97)
+
+        println(stream.getLength())
+
+        val s = stream.base.toAsyncStream()
+        println(s.readAll().decodeToString())
     }
 }

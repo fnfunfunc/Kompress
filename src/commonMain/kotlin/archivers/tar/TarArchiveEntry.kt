@@ -22,6 +22,7 @@ import archivers.tar.TarConstants.LF_FIFO
 import archivers.tar.TarConstants.LF_GNUTYPE_LONGLINK
 import archivers.tar.TarConstants.LF_GNUTYPE_LONGNAME
 import archivers.tar.TarConstants.LF_GNUTYPE_SPARSE
+import archivers.tar.TarConstants.LF_LINK
 import archivers.tar.TarConstants.LF_MULTIVOLUME
 import archivers.tar.TarConstants.LF_NORMAL
 import archivers.tar.TarConstants.LF_OFFSET
@@ -50,6 +51,7 @@ import archivers.tar.TarConstants.SPARSE_HEADERS_IN_OLDGNU_HEADER
 import archivers.tar.TarConstants.UIDLEN
 import archivers.tar.TarConstants.UNAMELEN
 import archivers.tar.TarConstants.VERSIONLEN
+import archivers.tar.TarConstants.VERSION_GNU_SPACE
 import archivers.tar.TarConstants.VERSION_POSIX
 import archivers.tar.TarConstants.XSTAR_ATIME_OFFSET
 import archivers.tar.TarConstants.XSTAR_CTIME_OFFSET
@@ -58,10 +60,7 @@ import archivers.tar.TarConstants.XSTAR_MAGIC_OFFSET
 import archivers.tar.TarConstants.XSTAR_MULTIVOLUME_OFFSET
 import archivers.tar.TarConstants.XSTAR_PREFIX_OFFSET
 import archivers.zip.ZipEncoding
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
+import kotlinx.datetime.*
 import okio.IOException
 import okio.Path
 import utils.*
@@ -71,7 +70,8 @@ class TarArchiveEntry : ArchiveEntry {
     var name: String = ""
         private set
 
-    private var linkName: String = ""
+    var linkName: String = ""
+        private set
 
     private var userName: String = ""
 
@@ -91,7 +91,8 @@ class TarArchiveEntry : ArchiveEntry {
     var mode = 0
         private set
 
-    private var linkFlag: Byte = 0
+    var linkFlag: Byte = 0
+        private set
 
     private var symbolLinkTarget: Path? = null
 
@@ -296,6 +297,87 @@ class TarArchiveEntry : ArchiveEntry {
         readFileMetadata(file)
         preserveAbsolutePath = false
     }
+
+    /**
+     * Construct an entry with only a name. This allows the programmer
+     * to construct the entry's header "by hand". File is set to null.
+     *
+     *
+     * The entry's name will be the value of the `name`
+     * argument with all file separators replaced by forward slashes
+     * and leading slashes as well as Windows drive letters stripped.
+     *
+     * @param name the entry name
+     */
+    constructor(name: String) : this(name, false)
+
+
+    /**
+     * Construct an entry with a name and a link flag.
+     *
+     *
+     * The entry's name will be the value of the `name`
+     * argument with all file separators replaced by forward slashes
+     * and leading slashes as well as Windows drive letters
+     * stripped.
+     *
+     * @param name the entry name
+     * @param linkFlag the entry link flag.
+     */
+    constructor(name: String, linkFlag: Byte) : this(name, linkFlag, false)
+
+
+    /**
+     * Construct an entry with only a name. This allows the programmer
+     * to construct the entry's header "by hand". File is set to null.
+     *
+     *
+     * The entry's name will be the value of the `name`
+     * argument with all file separators replaced by forward slashes.
+     * Leading slashes and Windows drive letters are stripped if
+     * `preserveAbsolutePath` is `false`.
+     *
+     * @param name the entry name
+     * @param preserveAbsolutePath whether to allow leading slashes
+     * or drive letters in the name.
+     *
+     * @since 1.1
+     */
+    constructor(name: String, preserveAbsolutePath: Boolean) : this(preserveAbsolutePath) {
+        val name = normalizeFileName(name, preserveAbsolutePath)
+        val isDir = name.endsWith("/")
+        this.name = name
+        mode =
+            if (isDir) DEFAULT_DIR_MODE else DEFAULT_FILE_MODE
+        linkFlag = if (isDir) LF_DIR else LF_NORMAL
+        mTime = Clock.System.now() // java.nio.file.attribute.FileTime.from(java.time.Instant.now())
+        userName = ""
+    }
+
+    /**
+     * Construct an entry with a name and a link flag.
+     *
+     *
+     * The entry's name will be the value of the `name`
+     * argument with all file separators replaced by forward slashes.
+     * Leading slashes and Windows drive letters are stripped if
+     * `preserveAbsolutePath` is `false`.
+     *
+     * @param name the entry name
+     * @param linkFlag the entry link flag.
+     * @param preserveAbsolutePath whether to allow leading slashes
+     * or drive letters in the name.
+     *
+     * @since 1.5
+     */
+    constructor(name: String, linkFlag: Byte, preserveAbsolutePath: Boolean) : this(name, preserveAbsolutePath) {
+        this.linkFlag = linkFlag
+        if (linkFlag == LF_GNUTYPE_LONGNAME) {
+            magic = MAGIC_GNU
+            version = VERSION_GNU_SPACE
+        }
+    }
+
 
     /**
      * add a PAX header to this entry. If the header corresponds to an existing field in the entry,
@@ -738,7 +820,7 @@ class TarArchiveEntry : ArchiveEntry {
         this.groupId = groupId
     }
 
-    private fun setSize(size: Long) {
+    fun setSize(size: Long) {
         this.size = size
     }
 
@@ -762,7 +844,7 @@ class TarArchiveEntry : ArchiveEntry {
      * @param time This entry's new modification time.
      * @since 1.22
      */
-    private fun setLastModifiedTime(time: Instant) {
+    fun setLastModifiedTime(time: Instant) {
         mTime = time
     }
 
@@ -1038,6 +1120,15 @@ class TarArchiveEntry : ArchiveEntry {
     fun getLastModifiedTime() = mTime
 
     /**
+     * get extra PAX Headers
+     * @return read-only map containing any extra PAX Headers
+     * @since 1.15
+     */
+    fun getExtraPaxHeaders(): Map<String, String> {
+        return extraPaxHeaders.toMap()
+    }
+
+    /**
      * If this entry represents a file, and the file is a directory, return
      * an array of TarEntries for this entry's children.
      *
@@ -1158,6 +1249,16 @@ class TarArchiveEntry : ArchiveEntry {
             true
         } else !isPaxHeader() && !isGlobalPaxHeader() && name.endsWith("/")
 
+    }
+
+    /**
+     * Check if this is a link entry.
+     *
+     * @since 1.2
+     * @return whether this is a link entry
+     */
+    fun isLink(): Boolean {
+        return linkFlag == LF_LINK
     }
 
     /**
