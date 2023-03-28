@@ -31,30 +31,6 @@ fun hashCode(a: Array<Any?>?): Int {
     return result
 }
 
-fun arrayAdd(array: ByteArray, value: Byte, start: Int = 0, end: Int = array.size) { for (n in start until end) array[n] = (array[n] + value).toByte() }
-fun arrayAdd(array: ShortArray, value: Short, start: Int = 0, end: Int = array.size) { for (n in start until end) array[n] = (array[n] + value).toShort() }
-fun arrayAdd(array: IntArray, value: Int, start: Int = 0, end: Int = array.size) { for (n in start until end) array[n] = array[n] + value }
-fun arrayAdd(array: LongArray, value: Long, start: Int = 0, end: Int = array.size) { for (n in start until end) array[n] = array[n] + value }
-fun arrayAdd(array: FloatArray, value: Float, start: Int = 0, end: Int = array.size) { for (n in start until end) array[n] = array[n] + value }
-fun arrayAdd(array: DoubleArray, value: Double, start: Int = 0, end: Int = array.size) { for (n in start until end) array[n] = array[n] + value }
-
-
-/** Fills the [array] with the [value] starting a [start] end ending at [end] (end is not inclusive) */
-fun <T> arrayFill(array: Array<T>, value: T, start: Int = 0, end: Int = array.size): Unit = array.fill(value, start, end)
-/** Fills the [array] with the [value] starting a [start] end ending at [end] (end is not inclusive) */
-fun arrayFill(array: BooleanArray, value: Boolean, start: Int = 0, end: Int = array.size): Unit = array.fill(value, start, end)
-/** Fills the [array] with the [value] starting a [start] end ending at [end] (end is not inclusive) */
-fun arrayFill(array: LongArray, value: Long, start: Int = 0, end: Int = array.size): Unit = array.fill(value, start, end)
-/** Fills the [array] with the [value] starting a [start] end ending at [end] (end is not inclusive) */
-fun arrayFill(array: ByteArray, value: Byte, start: Int = 0, end: Int = array.size): Unit = array.fill(value, start, end)
-/** Fills the [array] with the [value] starting a [start] end ending at [end] (end is not inclusive) */
-fun arrayFill(array: ShortArray, value: Short, start: Int = 0, end: Int = array.size): Unit = array.fill(value, start, end)
-/** Fills the [array] with the [value] starting a [start] end ending at [end] (end is not inclusive) */
-fun arrayFill(array: IntArray, value: Int, start: Int = 0, end: Int = array.size): Unit = array.fill(value, start, end)
-/** Fills the [array] with the [value] starting a [start] end ending at [end] (end is not inclusive) */
-fun arrayFill(array: FloatArray, value: Float, start: Int = 0, end: Int = array.size): Unit = array.fill(value, start, end)
-/** Fills the [array] with the [value] starting a [start] end ending at [end] (end is not inclusive) */
-fun arrayFill(array: DoubleArray, value: Double, start: Int = 0, end: Int = array.size): Unit = array.fill(value, start, end)
 
 
 private inline fun arrayIndexOf(
@@ -78,68 +54,6 @@ private inline fun arrayIndexOf(
     return -1
 }
 
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun <T> arrayCopy(src: Array<out T>, srcPos: Int, dst: Array<T>, dstPos: Int, size: Int) {
-    src.copyInto(dst as Array<T>, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun arrayCopy(src: BooleanArray, srcPos: Int, dst: BooleanArray, dstPos: Int, size: Int) {
-    src.copyInto(dst, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun arrayCopy(src: LongArray, srcPos: Int, dst: LongArray, dstPos: Int, size: Int) {
-    src.copyInto(dst, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun arrayCopy(src: ByteArray, srcPos: Int, dst: ByteArray, dstPos: Int, size: Int) {
-    src.copyInto(dst, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun arrayCopy(src: ShortArray, srcPos: Int, dst: ShortArray, dstPos: Int, size: Int) {
-    src.copyInto(dst, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun arrayCopy(src: CharArray, srcPos: Int, dst: CharArray, dstPos: Int, size: Int) {
-    src.copyInto(dst, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun arrayCopy(src: IntArray, srcPos: Int, dst: IntArray, dstPos: Int, size: Int) {
-    src.copyInto(dst, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun arrayCopy(src: FloatArray, srcPos: Int, dst: FloatArray, dstPos: Int, size: Int) {
-    src.copyInto(dst, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun arrayCopy(src: DoubleArray, srcPos: Int, dst: DoubleArray, dstPos: Int, size: Int) {
-    src.copyInto(dst, dstPos, srcPos, srcPos + size)
-}
-
-/** Copies [size] elements of [src] starting at [srcPos] into [dst] at [dstPos]  */
-fun <T> arrayCopy(src: List<T>, srcPos: Int, dst: MutableList<T>, dstPos: Int, size: Int) {
-    if (src === dst) error("Not supporting the same array")
-    for (n in 0 until size) {
-        dst[dstPos + n] = src[srcPos]
-    }
-}
-
-inline fun <T> arrayCopy(size: Int, src: Any?, srcPos: Int, dst: Any?, dstPos: Int, setDst: (Int, T) -> Unit, getSrc: (Int) -> T) {
-    val overlapping = src === dst && dstPos > srcPos
-    if (overlapping) {
-        var n = size
-        while (--n >= 0) setDst(dstPos + n, getSrc(srcPos + n))
-    } else {
-        for (n in 0 until size) setDst(dstPos + n, getSrc(srcPos + n))
-    }
-}
 
 fun BooleanArray.indexOf(sub: BooleanArray, starting: Int = 0): Int =
     arrayIndexOf(starting, size, sub.size) { n, m -> this[n] == sub[m] }

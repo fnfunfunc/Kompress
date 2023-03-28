@@ -3,6 +3,7 @@ package archivers.tar
 import archivers.zip.ZipEncoding
 import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.Sign
+import com.soywiz.kmem.arraycopy
 import com.soywiz.korio.stream.AsyncInputStream
 import com.soywiz.korio.stream.SyncInputStream
 import com.soywiz.korio.stream.readBytes
@@ -122,7 +123,7 @@ object TarUtil {
             )
         }
         val off = offset + length - len
-        arrayCopy(b, 0, buf, off, len)
+        arraycopy(b, 0, buf, off, len)
         val fill = (if (negative) 0xff else 0).toByte()
         for (i in offset + 1 until off) {
             buf[i] = fill
@@ -288,7 +289,7 @@ object TarUtil {
         }
         val limit: Int = b.size//b.limit() - b.position()
 
-        arrayCopy(b, 0, buf, offset, limit)
+        arraycopy(b, 0, buf, offset, limit)
 
         // Pad any remaining output bytes with NUL
         for (i in limit until length) {
@@ -363,7 +364,7 @@ object TarUtil {
         negative: Boolean
     ): Long {
         val remainder = ByteArray(length - 1)
-        arrayCopy(buffer, offset + 1, remainder, 0, length - 1)
+        arraycopy(buffer, offset + 1, remainder, 0, length - 1)
         val value: BigInteger = BigInteger.fromByteArray(remainder, sign = if (negative) Sign.NEGATIVE else Sign.POSITIVE)
 //        if (negative) {
 //            // 2's complement
@@ -535,7 +536,7 @@ object TarUtil {
         }
         if (len > 0) {
             val b = ByteArray(len)
-            arrayCopy(buffer, offset, b, 0, len)
+            arraycopy(buffer, offset, b, 0, len)
             return encoding?.decode(b) ?: b.decodeToString(commonCharset = CommonCharset.UTF8)
         }
         return ""
