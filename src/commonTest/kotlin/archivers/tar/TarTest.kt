@@ -3,9 +3,7 @@ package archivers.tar
 import com.soywiz.korio.async.suspendTest
 import com.soywiz.korio.async.use
 import com.soywiz.korio.file.VfsOpenMode
-import com.soywiz.korio.file.std.localVfs
-import com.soywiz.korio.file.std.rootLocalVfs
-import com.soywiz.korio.file.std.tempVfs
+import com.soywiz.korio.file.std.userHomeVfs
 import com.soywiz.korio.stream.writeFile
 import okio.Path.Companion.toPath
 import kotlin.test.Test
@@ -18,8 +16,8 @@ class TarTest {
 
     @Test
     fun test() = suspendTest {
-        val output = com.soywiz.korio.file.std.userHomeVfs["$resourceDir/bla.tar"]//java.io.File(dir, "bla.tar")
-        val file1 =  com.soywiz.korio.file.std.userHomeVfs["$resourceDir/test.xml"]
+        val output = userHomeVfs["$resourceDir/bla.tar"]//java.io.File(dir, "bla.tar")
+        val file1 =  userHomeVfs["$resourceDir/xml/test.xml"]
         output.open(VfsOpenMode.WRITE).use {
             TarArchiveAsyncOutputStream(this).use {
                 val entry = TarArchiveEntry("test1.xml")
