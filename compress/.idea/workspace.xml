@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="eebcd874-14b0-400e-9cb1-3b2b8388f011" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveAsyncOutputStream.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/CountingAsyncOutputStream.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/FixedLengthBlockAsyncOutputStream.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/commonTest/kotlin/archivers/tar/TarUtilTest.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../src/commonTest/resources/COMPRESS-197.tar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/../gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/../settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/ArchiveAsyncInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/ArchiveAsyncInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/ArchiveEntry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/ArchiveEntry.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/ArchiveInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/ArchiveInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/ArchiveUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/ArchiveUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/EntryStreamOffsets.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/EntryStreamOffsets.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/ICodeProgress.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/ICodeProgress.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/Lzma.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/Lzma.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lz/BinTree.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lz/BinTree.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lz/InWindow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lz/InWindow.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lz/OutWindow.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lz/OutWindow.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lzma/Base.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lzma/Base.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lzma/LzmaDecoder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lzma/LzmaDecoder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lzma/LzmaEncoder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/lzma/LzmaEncoder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/rangeCoder/BitTreeDecoder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/rangeCoder/BitTreeDecoder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/rangeCoder/BitTreeEncoder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/rangeCoder/BitTreeEncoder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/rangeCoder/Decoder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/rangeCoder/Decoder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/rangeCoder/Encoder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/sevenzip/rangeCoder/Encoder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveAsyncInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveAsyncInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveEntry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveEntry.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveSparseEntry.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveSparseEntry.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveSparseZeroInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveSparseZeroInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveStructSparse.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarArchiveStructSparse.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarConstants.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarConstants.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarFile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarFile.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarGnuSparseKeys.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarGnuSparseKeys.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/tar/TarUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/BoundedArchiveInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/BoundedArchiveInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/BoundedAsyncInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/BoundedAsyncInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/BoundedInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/BoundedInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/BoundedSeekableByteChannelInputStream.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/utils/BoundedSeekableByteChannelInputStream.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/zip/Zip.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/zip/Zip.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/zip/ZipBuilder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/zip/ZipBuilder.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/zip/ZipEncoding.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/zip/ZipEncoding.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/zip/ZipEncodingHelper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/archivers/zip/ZipEncodingHelper.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/compress/methods/CompressMethod.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/compress/methods/CompressMethod.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/ArrayExt.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/ArrayExt.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/BitReader.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/BitReader.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/Buffer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/Buffer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/FileUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/FileUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/IOExt.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/IOExt.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/IOUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/IOUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/Numbers.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/Numbers.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/SimpleCheckSum.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/SimpleCheckSum.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/StreamExt.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/StreamExt.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/StringUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/StringUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/SystemUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonMain/kotlin/utils/SystemUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonTest/kotlin/BufferTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonTest/kotlin/BufferTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonTest/kotlin/SevenZipTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonTest/kotlin/SevenZipTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonTest/kotlin/StreamExtTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonTest/kotlin/StreamExtTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonTest/kotlin/StringUtilsTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonTest/kotlin/StringUtilsTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonTest/kotlin/SystemUtilTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonTest/kotlin/SystemUtilTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonTest/kotlin/ZipTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonTest/kotlin/ZipTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonTest/kotlin/archivers/tar/TarArchiveInputStreamTest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonTest/kotlin/archivers/tar/TarArchiveInputStreamTest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/commonTest/resources/txt/small_test.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/commonTest/resources/txt/small_test.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/jvmMain/kotlin/utils/FileUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/jvmMain/kotlin/utils/FileUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/jvmMain/kotlin/utils/StringUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/jvmMain/kotlin/utils/StringUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/jvmMain/kotlin/utils/SystemUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/jvmMain/kotlin/utils/SystemUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/macosMain/kotlin/utils/FileUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/macosMain/kotlin/utils/FileUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../src/macosMain/kotlin/utils/SystemUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/../src/macosMain/kotlin/utils/SystemUtil.kt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="2Nb7uqiMBp67ObwS0WKHzXTLzit" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/eternal/Program/Kotlin_Projects/Kompress/compress",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="eebcd874-14b0-400e-9cb1-3b2b8388f011" name="Changes" comment="" />
+      <created>1679921153855</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1679921153855</updated>
+      <workItem from="1679921155024" duration="966000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

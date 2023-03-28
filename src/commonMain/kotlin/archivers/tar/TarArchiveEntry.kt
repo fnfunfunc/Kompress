@@ -804,19 +804,23 @@ class TarArchiveEntry : ArchiveEntry {
         this.linkName = linkName
     }
 
-    private fun setUserId(userId: Long) {
+    fun setMode(mode: Int) {
+        this.mode = mode
+    }
+
+    fun setUserId(userId: Long) {
         this.userId = userId
     }
 
-    private fun setUserName(userName: String) {
+    fun setUserName(userName: String) {
         this.userName = userName
     }
 
-    private fun setGroupName(groupName: String) {
+    fun setGroupName(groupName: String) {
         this.groupName = groupName
     }
 
-    private fun setGroupId(groupId: Long) {
+    fun setGroupId(groupId: Long) {
         this.groupId = groupId
     }
 

@@ -221,10 +221,7 @@ class TarArchiveAsyncOutputStream : AsyncOutputStream {
         out.flushBlock()
         if (currBytes < currSize) {
             throw IOException(
-                "Entry '" + currName + "' closed at '"
-                        + currBytes
-                        + "' before the '" + currSize
-                        + "' bytes specified in the header were written"
+                "Entry '$currName' closed at '$currBytes' before the '$currSize' bytes specified in the header were wriiten"
             )
         }
         recordsWritten += currSize / RECORD_SIZE

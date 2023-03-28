@@ -5,8 +5,6 @@ import archivers.utils.BoundedArchiveInputStream
 import archivers.utils.BoundedInputStream
 import archivers.utils.BoundedSeekableByteChannelInputStream
 import com.soywiz.kmem.ByteArrayBuilder
-import com.soywiz.korio.file.PathInfo
-import com.soywiz.korio.file.std.rootLocalVfs
 import com.soywiz.korio.lang.use
 import com.soywiz.korio.stream.*
 import okio.*
@@ -81,8 +79,6 @@ class TarFile : Closeable {
         encoding: String?,
         lenient: Boolean
     ) {
-        val path = PathInfo("")
-        rootLocalVfs
 //        this.zipEncoding = ZipEncodingHelper.getZipEncoding(encoding)
         this.recordSize = recordSize
         this.recordBuffer = utils.Buffer(recordSize)//java.nio.ByteBuffer.allocate(recordSize)
