@@ -11,8 +11,8 @@ import archivers.sevenzip.rangeCoder.Decoder as RangeDecoder
 class LzmaDecoder {
     inner class LenDecoder {
         var m_Choice = ShortArray(2)
-        var m_LowCoder: Array<BitTreeDecoder?> = arrayOfNulls<BitTreeDecoder>(Base.kNumPosStatesMax)
-        var m_MidCoder: Array<BitTreeDecoder?> = arrayOfNulls<BitTreeDecoder>(Base.kNumPosStatesMax)
+        var m_LowCoder: Array<BitTreeDecoder?> = arrayOfNulls(Base.kNumPosStatesMax)
+        var m_MidCoder: Array<BitTreeDecoder?> = arrayOfNulls(Base.kNumPosStatesMax)
         var m_HighCoder: BitTreeDecoder = BitTreeDecoder(Base.kNumHighLenBits)
         var m_NumPosStates = 0
         fun create(numPosStates: Int) {

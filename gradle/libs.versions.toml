@@ -1,5 +1,5 @@
 [versions]
-kotlin = "1.8.10"
+ditchoom-buffer = "1.2.2"
 kotlin-bignum = "0.3.8"
 kotlinx-coroutine-test = "1.6.4"
 kotlinx-datetime = "0.4.0"
@@ -7,6 +7,7 @@ korge = "4.0.0-alpha-6"
 okio = "3.3.0"
 
 [libraries]
+ditchoom-buffer = { group = "com.ditchoom", name = "buffer", version.ref = "ditchoom-buffer"}
 kotlin-bignum = { group = "com.ionspin.kotlin", name = "bignum", version.ref = "kotlin-bignum" }
 kotlinx-coroutine-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutine-test" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime"}

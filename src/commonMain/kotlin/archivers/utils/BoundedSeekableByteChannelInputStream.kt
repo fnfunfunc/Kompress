@@ -23,7 +23,6 @@ class BoundedSeekableByteChannelInputStream(
 
     override fun read(pos: Long, buf: ByteBuffer): Int {
         channel.seekReadTo(pos.toInt())
-        // buf.flip()
         // TODO(Maybe check)
         val readAvailable = channel.availableRead
         buf.write(channel)

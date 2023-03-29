@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 plugins {
     kotlin("multiplatform") version "1.8.10"
 }
@@ -20,7 +22,6 @@ kotlin {
     }
     val hostOs = System.getProperty("os.name")
     val arch = System.getProperty("os.arch")
-    println(arch)
     val isMingwX64 = hostOs.startsWith("Windows")
     val nativeTarget = when {
         hostOs == "Mac OS X" -> {
@@ -37,16 +38,18 @@ kotlin {
                 "aarch64" -> linuxArm64("native")
                 "armv71" -> linuxArm32Hfp("native") // will be removed in Kotlin 1.9.20
                 "x86_64" -> linuxX64("native")
-                "i686" -> throw GradleException("linux is not support 32-bit x86 equipment")
+                "i686" -> throw GradleException("Not support 32-bit x86 equipment")
                 else -> linuxX64("native") // default
             }
         }
         isMingwX64 -> mingwX64("native")
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+        else -> throw GradleException("Host OS is not supported in Kotlin Multiplatform.")
     }
 
     macosArm64()
     macosX64()
+    iosArm64()
+    iosX64()
 
     sourceSets {
         val commonMain by getting {
@@ -54,7 +57,7 @@ kotlin {
                 implementation(libs.kotlin.bignum)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.okio)
-                implementation("com.ditchoom:buffer:1.2.2")
+                implementation(libs.ditchoom.buffer)
                 implementation(libs.korge.korio)
                 implementation(libs.korge.kmem)
             }
@@ -75,22 +78,55 @@ kotlin {
             dependsOn(commonTest)
         }
 
-        val macosArm64Main by getting
-        val macosArm64Test by getting
-        val macosX64Main by getting
-        val macosX64Test by getting
+
+        val darwinMain by creating {
+            dependsOn(nativeMain)
+        }
+
+        val darwinTest by creating {
+            dependsOn(nativeTest)
+        }
+
+        val iosMain by creating {
+            dependsOn(darwinMain)
+        }
+
+        val iosTest by creating {
+            dependsOn(darwinTest)
+        }
 
         val macosMain by creating {
-            dependsOn(nativeMain)
-            macosArm64Main.dependsOn(this)
-            macosX64Main.dependsOn(this)
+            dependsOn(darwinMain)
         }
 
         val macosTest by creating {
-            dependsOn(nativeTest)
-            macosArm64Test.dependsOn(this)
-            macosX64Test.dependsOn(this)
+            dependsOn(darwinTest)
         }
 
+        val iosArm64Main by getting {
+            dependsOn(iosMain)
+        }
+        val iosArm64Test by getting {
+            dependsOn(iosTest)
+        }
+        val iosX64Main by getting {
+            dependsOn(iosMain)
+        }
+        val iosX64Test by getting {
+            dependsOn(iosTest)
+        }
+
+        val macosArm64Main by getting {
+            dependsOn(macosMain)
+        }
+        val macosArm64Test by getting {
+            dependsOn(macosTest)
+        }
+        val macosX64Main by getting {
+            dependsOn(macosMain)
+        }
+        val macosX64Test by getting {
+            dependsOn(macosTest)
+        }
     }
 }

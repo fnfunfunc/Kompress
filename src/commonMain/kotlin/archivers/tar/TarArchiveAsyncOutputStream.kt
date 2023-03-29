@@ -370,7 +370,7 @@ class TarArchiveAsyncOutputStream : AsyncOutputStream {
         paxHeaderName: String, linkType: Byte, fieldName: String,
     ): Boolean {
         val encodedName = name.encodeToByteArray()
-        val len: Int = encodedName.size// - encodedName.position()
+        val len: Int = encodedName.size // - encodedName.position()
         if (len >= TarConstants.NAMELEN) {
             if (longFileMode == LONGFILE_POSIX) {
                 paxHeaders[paxHeaderName] = name

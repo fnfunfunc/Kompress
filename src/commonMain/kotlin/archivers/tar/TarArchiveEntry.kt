@@ -73,7 +73,8 @@ class TarArchiveEntry : ArchiveEntry {
     var linkName: String = ""
         private set
 
-    private var userName: String = ""
+    var userName: String = ""
+        private set
 
     var userId: Long = 0
         private set
@@ -272,22 +273,6 @@ class TarArchiveEntry : ArchiveEntry {
     @Throws(IOException::class)
     constructor(file: Path) : this(file, file.toString())
 
-    /**
-     * Construct an entry for a file. File is set to file, and the
-     * header is constructed from information from the file.
-     *
-     *
-     * The entry's name will be the value of the `fileName`
-     * argument with all file separators replaced by forward slashes
-     * and leading slashes as well as Windows drive letters stripped.
-     * The name will end in a slash if the `file` represents a
-     * directory.
-     *
-     * @param file     The file that the entry represents.
-     * @param fileName the name to be used for the entry.
-     * @throws IOException if an I/O error occurs
-     * @since 1.21
-     */
     @Throws(IOException::class)
     constructor(file: Path, fileName: String) {
         val normalizedName: String =
@@ -1463,9 +1448,7 @@ class TarArchiveEntry : ArchiveEntry {
             if (header[LF_OFFSET] != LF_MULTIVOLUME) {
                 return true
             }
-            // We come only here if we try to read in a GNU/xstar/xustar multivolume archive starting past volume #0
-            // As of 1.22, commons-compress does not support multivolume tar archives.
-            // If/when it does, this should work as intended.
+
             if (header[XSTAR_MULTIVOLUME_OFFSET].toInt() and 0x80 == 0
                 && header[XSTAR_MULTIVOLUME_OFFSET + 11] != ' '.code.toByte()
             ) {
