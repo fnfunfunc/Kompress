@@ -1,5 +1,3 @@
-package archivers.tar
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,6 +16,9 @@ package archivers.tar
  * specific language governing permissions and limitations
  * under the License.
  */
+
+package archivers.tar
+
 /**
  * This interface contains all the definitions used in the package.
  *
